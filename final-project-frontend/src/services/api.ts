@@ -1,5 +1,83 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+// === ADD: token bridge & helpers (non-breaking) =============================
+/** Read a token from any common key */
+const _readAnyToken = (): string | null => {
+  try {
+    return (
+      localStorage.getItem('authToken') ||
+      localStorage.getItem('token') ||
+      sessionStorage.getItem('authToken') ||
+      sessionStorage.getItem('token')
+    );
+  } catch {
+    return null;
+  }
+};
+
+/** Keep token keys in sync so makeRequest() always finds it under 'authToken' */
+(() => {
+  try {
+    // Initial sync on module load
+    const primary = localStorage.getItem('authToken');
+    if (!primary) {
+      const any = _readAnyToken();
+      if (any) localStorage.setItem('authToken', any);
+    }
+
+    // Cross-tab sync
+    window.addEventListener?.('storage', (e) => {
+      if ((e.key === 'token' || e.key === 'authToken') && e.newValue) {
+        try {
+          localStorage.setItem('authToken', e.newValue);
+        } catch {
+          /* ignore */
+        }
+      }
+    });
+
+    // Same-tab fallback: light polling to catch writes done after this module loads
+    const _sync = () => {
+      try {
+        const found = _readAnyToken();
+        const current = localStorage.getItem('authToken');
+        if (found && current !== found) localStorage.setItem('authToken', found);
+      } catch {
+        /* ignore */
+      }
+    };
+    // Poll briefly and then back off (quickly resolves after login)
+    let ticks = 0;
+    const id = setInterval(() => {
+      _sync();
+      ticks += 1;
+      if (ticks > 60) clearInterval(id); // stop after ~30s
+    }, 500);
+  } catch {
+    /* ignore in non-browser/SSR */
+  }
+})();
+
+/** Optional utility if other code wants to set/clear tokens explicitly */
+export const setAuthToken = (token: string | null) => {
+  try {
+    if (token) {
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('token', token);
+      sessionStorage.setItem('authToken', token);
+      sessionStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('token');
+    }
+  } catch {
+    /* ignore storage errors */
+  }
+};
+// =========================================================================== 
+
 // Helper function to get auth token
 const getAuthToken = () => {
   return localStorage.getItem('authToken');

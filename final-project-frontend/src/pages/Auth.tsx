@@ -11,6 +11,8 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { login } = useAuth();
+  // ADD: also access register from the auth context
+  const { register: registerUser } = useAuth();
 
   useEffect(() => {
     const mode = searchParams.get('mode');
@@ -37,6 +39,26 @@ const Auth = () => {
   };
 
   const handleSignup = (name: string, email: string, password: string, userType: 'user' | 'admin') => {
+    // ADD: real signup using backend; navigate on success; stop the old placeholder flow
+    registerUser(name, email, password)
+      .then((success) => {
+        if (success) {
+          toast.success(`${userType === 'admin' ? 'Admin' : 'User'} account created successfully!`);
+          if (userType === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        } else {
+          toast.error("Sign up failed. Please try again.");
+        }
+      })
+      .catch((err) => {
+        console.error("Signup failed:", err);
+        toast.error("Sign up failed. Please try again.");
+      });
+    return;
+
     // TODO: Implement actual signup logic with your backend
     console.log('Signup attempt:', { name, email, password, userType });
     
