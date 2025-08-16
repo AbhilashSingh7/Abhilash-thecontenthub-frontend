@@ -20,6 +20,7 @@ export interface SearchResponse {
   Search: Movie[];
   totalResults: string;
   Response: string;
+  Error?: string; //yf test
   page?: number;
 }
 
