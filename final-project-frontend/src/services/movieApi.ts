@@ -87,10 +87,27 @@ export const movieApi = {
     }
   },
 
-  // Create new custom movie (admin only)
-  createMovie: async (movieData: any): Promise<{ success: boolean; movie?: Movie; error?: string }> => {
+  // Get movies added by admin
+  getCustomMovies: async (): Promise<Movie[]> => {
     try {
-      const response = await moviesAPI.create(movieData);
+      return await moviesAPI.getCustomMovies();
+    } catch (error) {
+      console.error('Custom movies fetch error:', error);
+      return [];
+    }
+  },
+
+  // Create new custom movie (admin only)
+  createMovie: async (movieData: Omit<Movie, 'Source'>): Promise<{ success: boolean; movie?: Movie; error?: string }> => {
+    try {
+      // const response = await moviesAPI.create(movieData);
+
+      // to differentiate as added by admin
+      const movieWithSource = {
+        ...movieData,
+        Source: 'custom' as const
+      };
+      const response = await moviesAPI.create(movieWithSource);
       return response;
     } catch (error) {
       console.error('Movie creation error:', error);

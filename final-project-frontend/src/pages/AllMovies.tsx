@@ -53,17 +53,17 @@ const AllMovies = () => {
         newMovies = searchResults.Search || [];
         pages = Math.ceil(parseInt(searchResults.totalResults || '0') / 10);
       } else {
-        // Get top rated movies and newly added movies
+        // Get top rated movies and custom added movies
         const results = await Promise.all([
           movieApi.getTopRatedMovies(currentPage), // before
-          movieApi.getNewReleases()
+          movieApi.getCustomMovies()
         ]);
 
         const topRatedResult = results[0];
-        const newReleases = results[1];
+        const customMovies = results[1];
 
         // Combine results, with new releases
-        newMovies = [...newReleases, ...topRatedResult.movies];
+        newMovies = [...customMovies, ...topRatedResult.movies];
 
         // Remove duplicates by imdbID
         newMovies = newMovies.filter((movie, index, self) =>
