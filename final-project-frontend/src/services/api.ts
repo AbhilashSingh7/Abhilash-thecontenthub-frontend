@@ -1,5 +1,48 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+/* === ADD: LAN-safe shim for absolute localhost API URLs =====================
+   If you're opening the app from another device (LAN) but VITE_API_URL points
+   to http://localhost:3001/api, that "localhost" refers to the other device.
+   This shim rewrites requests to use a relative "/api" base so the Vite proxy
+   (server.proxy) can forward to your backend on your machine.
+============================================================================= */
+(() => {
+  try {
+    const isLocalhostApi =
+      typeof API_BASE_URL === 'string' &&
+      /^https?:\/\/localhost(?::\d+)?\/api\/?$/.test(API_BASE_URL);
+
+    const isLanContext =
+      typeof window !== 'undefined' &&
+      typeof window.location?.hostname === 'string' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1';
+
+    // Only rewrite when visiting from LAN *and* API_BASE_URL hard-points to localhost
+    if (isLocalhostApi && isLanContext && typeof window !== 'undefined' && typeof window.fetch === 'function') {
+      const LAN_SAFE_API_BASE = '/api';
+      const origFetch = window.fetch.bind(window);
+
+      // Lightweight wrapper to rewrite requests that start with API_BASE_URL
+      window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+        try {
+          if (typeof input === 'string' &&
+              API_BASE_URL &&
+              input.startsWith(API_BASE_URL)) {
+            input = input.replace(API_BASE_URL, LAN_SAFE_API_BASE);
+          }
+        } catch {
+          /* ignore */
+        }
+        return origFetch(input, init);
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+})();
+// =========================================================================== 
+
 // === ADD: token bridge & helpers (non-breaking) =============================
 /** Read a token from any common key */
 const _readAnyToken = (): string | null => {
