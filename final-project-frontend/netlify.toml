@@ -1,21 +1,9 @@
 [build]
-  base = "final-project-frontend"   # folder that has package.json/vite.config.ts
   command = "npm run build"
   publish = "dist"
 
-# (optional) keep env here instead of UI; UI values will override if both exist
-[build.environment]
-  VITE_API_URL = "/api"
-
-# IMPORTANT: proxy rule FIRST, then SPA fallback (order matters)
 [[redirects]]
   from = "/api/*"
-  to = "https://857746098070.ngrok-free.app/api/:splat"  # replace if your ngrok URL changes
+  to = "https://abhilash-thecontenthub-backend.onrender.com/api/:splat"
   status = 200
   force = true
-
-# SPA fallback so deep routes work
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
