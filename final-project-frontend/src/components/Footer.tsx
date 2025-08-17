@@ -10,7 +10,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-foreground">Project Repositories</h3>
             <div className="space-y-2">
               <a
-                href="https://github.com/Snorman-zzz/final-project-frontend"
+                href="https://github.com/AbhilashSingh7/Abhilash-thecontenthub-frontend"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
@@ -19,7 +19,7 @@ const Footer = () => {
                 <span>Frontend Repository</span>
               </a>
               <a
-                href="https://github.com/Snorman-zzz/final-project-backend"
+                href="https://github.com/AbhilashSingh7/Abhilash-thecontenthub-backend"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
